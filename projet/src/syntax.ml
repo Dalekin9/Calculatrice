@@ -32,29 +32,36 @@ let rec subst e1 var e2 = match e1 with
 
 let rec derive expr var = match expr with
 | Var(name) -> if name == var then
-                  Num(1)
+                  Num(0)
                 else
                   expr
 | App1(op, expr) -> (match expr with
                    | Var(name) -> if name <> var then
-                                    derive (Num(1)) var 
+                                    derive (Num(1)) var
                                   else
                                     deriveApp1 expr var op
                    | _ ->  deriveApp1 expr var op)
 | App2(op, expr1, expr2) -> deriveApp2 expr1 expr2 var op
 | _ -> Num(0)
 
-and deriveApp1 expr var = function
-| Sqrt -> App2(Div, Num(1) ,App2(Mult, Num(2), App1(Sqrt,expr)))
-| Exp -> App1(Exp, expr)
-| Log -> App2(Div, Num(1), expr)
-| Sin -> App1(Cos, expr)
-| Cos -> App1(UMinus, App1(Sin, expr))
-| Tan -> App2(Div, Num(1), App2(Expo, expr, Num(2)))
-| ASin -> App2(Div, Num(1), App1(Sqrt, App2(Minus, Num(1), App2(Expo, expr, Num(2)))))
-| ACos -> App1(UMinus, App2(Div, Num(1), App1(Sqrt, App2(Minus, Num(1), App2(Expo, expr, Num(2))))))
-| ATan -> App2(Div, Num(1), App2(Plus, Num(1), App2(Expo, expr, Num(2))))
-| UMinus -> App1(UMinus, (derive expr var))
+and deriveApp1 expr var = match expr with
+| Var(name) -> (if name == var then
+                  function
+                  | Sqrt -> App2(Div, Num(1) ,App2(Mult, Num(2), App1(Sqrt,expr)))
+                  | Exp -> App1(Exp, expr)
+                  | Log -> App2(Div, Num(1), expr)
+                  | Sin -> App1(Cos, expr)
+                  | Cos -> App1(UMinus, App1(Sin, expr))
+                  | Tan -> App2(Div, Num(1), App2(Expo, expr, Num(2)))
+                  | ASin -> App2(Div, Num(1), App1(Sqrt, App2(Minus, Num(1), App2(Expo, expr, Num(2)))))
+                  | ACos -> App1(UMinus, App2(Div, Num(1), App1(Sqrt, App2(Minus, Num(1), App2(Expo, expr, Num(2))))))
+                  | ATan -> App2(Div, Num(1), App2(Plus, Num(1), App2(Expo, expr, Num(2))))
+                  | UMinus -> App1(UMinus, (derive expr var))
+                else
+                  function
+                  | _ -> (Num 0))
+| _ -> function
+        | _ -> (Num 0)
 
 and deriveApp2 expr1 expr2 var = function
 | Plus -> App2(Plus, (derive expr1 var), (derive expr2 var))
