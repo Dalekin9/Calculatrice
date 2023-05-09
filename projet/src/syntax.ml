@@ -30,8 +30,36 @@ let rec subst e1 var e2 = match e1 with
 |App2(op, expr1, expr2) -> App2(op, (subst expr1 var e2), subst expr2 var e2)
 | _ -> e1
 
+  let rec eval e =
+    match e with
+    | Num n -> Float.of_int n
+    | Var s -> failwith "Variable"
+    | App0 o0 -> (match o0 with 
+                  | Pi -> Float.pi
+                  | E -> Float.exp 1.)
+    | App1 (o1,expr) -> evalApp1 expr o1
+    | App2 (o2,e1,e2) -> evalApp2 e1 e2 o2
+
+                    
+and evalApp1 expr = function
+  | Sqrt -> Float.sqrt (eval expr)
+  | Exp -> Float.exp (eval expr)
+  | Log -> Float.log (eval expr)
+  | Sin -> Float.sin (eval expr)
+  | Cos -> Float.cos (eval expr)
+  | Tan -> Float.tan (eval expr)
+  | ASin -> Float.asin (eval expr)
+  | ACos -> Float.acos (eval expr)
+  | ATan -> Float.atan (eval expr)
+  | UMinus -> Float.neg (eval expr)
 
 
+and evalApp2 e1 e2 = function
+  | Plus -> (eval e1) +. (eval e2)
+  | Mult -> (eval e1) *. (eval e2)
+  | Minus -> (eval e1) -. (eval e2)
+  | Div -> (eval e1) /. (eval e2)
+  | Expo -> Float.pow (eval e1) (eval e2)
 
 (* Light : quelques fonctions pour aider à écrire de la syntaxe
    abstraite dans le code OCaml de manière plus légère. Par exemple:
