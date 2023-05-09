@@ -30,15 +30,50 @@ let rec subst e1 var e2 = match e1 with
 |App2(op, expr1, expr2) -> App2(op, (subst expr1 var e2), subst expr2 var e2)
 | _ -> e1
 
-  let rec eval e =
-    match e with
-    | Num n -> Float.of_int n
-    | Var s -> failwith "Variable"
-    | App0 o0 -> (match o0 with 
-                  | Pi -> Float.pi
-                  | E -> Float.exp 1.)
-    | App1 (o1,expr) -> evalApp1 expr o1
-    | App2 (o2,e1,e2) -> evalApp2 e1 e2 o2
+let rec derive expr var = match expr with
+| Var(name) -> if name == var then
+                  Num(1)
+                else
+                  expr
+| App1(op, expr) -> (match expr with
+                   | Var(name) -> if name <> var then
+                                    derive (Num(1)) var 
+                                  else
+                                    deriveApp1 expr var op
+                   | _ ->  deriveApp1 expr var op)
+| App2(op, expr1, expr2) -> deriveApp2 expr1 expr2 var op
+| _ -> Num(0)
+
+and deriveApp1 expr var = function
+| Sqrt -> App2(Div, Num(1) ,App2(Mult, Num(2), App1(Sqrt,expr)))
+| Exp -> App1(Exp, expr)
+| Log -> App2(Div, Num(1), expr)
+| Sin -> App1(Cos, expr)
+| Cos -> App1(UMinus, App1(Sin, expr))
+| Tan -> App2(Div, Num(1), App2(Expo, expr, Num(2)))
+| ASin -> App2(Div, Num(1), App1(Sqrt, App2(Minus, Num(1), App2(Expo, expr, Num(2)))))
+| ACos -> App1(UMinus, App2(Div, Num(1), App1(Sqrt, App2(Minus, Num(1), App2(Expo, expr, Num(2))))))
+| ATan -> App2(Div, Num(1), App2(Plus, Num(1), App2(Expo, expr, Num(2))))
+| UMinus -> App1(UMinus, (derive expr var))
+
+and deriveApp2 expr1 expr2 var = function
+| Plus -> App2(Plus, (derive expr1 var), (derive expr2 var))
+| Minus -> App2(Minus, (derive expr1 var), (derive expr2 var))
+| Mult -> App2(Plus, App2(Mult, expr1, (derive expr2 var)), App2(Mult, expr2, (derive expr1 var)))
+| Div ->  App2(Div, App2(Minus, App2(Mult, expr1, (derive expr2 var)), App2(Mult, expr2, (derive expr1 var))), App2(Expo, expr2, Num(2)))
+| Expo -> App2(Mult, expr2, App2(Expo, expr1, App2(Minus, expr2, Num(1))))
+
+
+let
+ rec eval e =
+  match e with
+  | Num n -> Float.of_int n
+  | Var s -> failwith "Variable"
+  | App0 o0 -> (match o0 with 
+                | Pi -> Float.pi
+                | E -> Float.exp 1.)
+  | App1 (o1,expr) -> evalApp1 expr o1
+  | App2 (o2,e1,e2) -> evalApp2 e1 e2 o2
 
                     
 and evalApp1 expr = function
