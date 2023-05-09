@@ -21,6 +21,18 @@ type cmd =
   | Integ of expr*string*expr*expr
   | Plot of expr*string
 
+let rec subst e1 var e2 = match e1 with
+|Var(name) -> if name == var then
+                e2
+              else
+                e1
+|App1(op, expr) -> App1(op, (subst expr var e2))
+|App2(op, expr1, expr2) -> App2(op, (subst expr1 var e2), subst expr2 var e2)
+| _ -> e1
+
+
+
+
 (* Light : quelques fonctions pour aider à écrire de la syntaxe
    abstraite dans le code OCaml de manière plus légère. Par exemple:
 
