@@ -218,6 +218,7 @@
       match e1, e2 with 
       | App1(Sin,e), App1(Cos, e1) -> if e = e1 then App1(Tan, e) else App2(Div, (simpl e1), (simpl e2))
       | App2(Mult,Num a,b), Num c -> if a mod c = 0 then simpl (App2(Mult, (Num (a/c)), b)) else App2(Div, (simpl (App2(Mult ,(Num a), b))), (Num c))
+      | App2(Mult,b,Num a), Num c -> if a mod c = 0 then simpl (App2(Mult,b, (Num (a/c)))) else App2(Div, (simpl (App2(Mult ,b,(Num a)))), (Num c))
       | Num n, Num m -> if n mod m = 0 then Num(n/m) else App2(Div, (Num n), (Num m))
       
       | _ -> App2(Div, (simpl e1), (simpl e2))
@@ -225,6 +226,7 @@
   
     and simplExpo e1 e2 =
       match e1, e2 with
+      | a, Num 1 -> simpl a
       | App1(Sqrt, e), Num 2 -> simpl e
       | a, App2(Div,Num 1,Num 2) -> simpl (App1(Sqrt, a))
       | _ -> App2(Expo, (simpl e1), (simpl e2))
