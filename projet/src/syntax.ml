@@ -50,6 +50,7 @@
   
   and simplLog = function
     |App1(Log, expr) -> (match expr with
+    | App1(Exp, a) -> simpl a
       |App2(Mult, expr1, expr2) -> App2(Plus, App1(Log, (simpl expr1)), App1(Log, (simpl expr2)))
       |App2(Div, expr1, expr2) -> App2(Minus, App1(Log, (simpl expr1)), App1(Log, (simpl expr2)))
       |App2(Expo, expr1, expr2) -> App2(Mult, (simpl expr2), App1(Log, (simpl expr1)))
@@ -133,8 +134,9 @@
                                 | App2(Mult,App0 Pi,Num n) -> 
                                   if n mod 4 = 1 then Num 1
                                   else if n mod 4 = 3 then App1(UMinus, (Num 1))
-                                  else Num 0
-                                | _ -> Num 0)
+                                  else if n mod 4 = 2 || n mod 4 = 0 then Num 0 
+                                  else  (simpl (App2(Div, e, (Num 2))))
+                                | _ ->  (simpl (App2(Div, e, (Num 2)))))
       | _ -> App1(Sin, (simpl e))
     
     
@@ -169,8 +171,9 @@
                               | App2(Mult,App0 Pi,Num n) -> 
                                 if n mod 4 = 0 then Num 1
                                 else if n mod 4 = 2 then App1(UMinus, (Num 1))
-                                else Num 0
-                              | _ -> Num 0)
+                                else if n mod 4 = 1 || n mod 4 = 3 then Num 0
+                                else App1(Cos, (simpl (App2(Div, e, (Num 2)))))
+                              | _ -> App1(Cos, (simpl (App2(Div, e, (Num 2))))))
       | _ -> App1(Cos, (simpl e))
     
     and simplPlus e1 e2 =
@@ -211,7 +214,7 @@
       | _, Num 1 -> simpl e1
       | Num n, Num m -> Num (n*m)
       | App1(Sqrt,a), App1(Sqrt,a1) -> if a = a1 then simpl a else App2(Mult, (simpl e1), (simpl e2))
-      | e, e1 -> if e = e1 then App2(Expo, (simpl e), (Num 2)) else App2(Mult, (simpl e1), (simpl e2))
+      | e, e1 -> if e = e1 then App2(Expo, (simpl e), (Num 2)) else App2(Mult, (simpl e), (simpl e1))
     
     and simplDiv e1 e2 =
       if e1 = e2 then Num 1 else
