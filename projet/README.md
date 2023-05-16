@@ -43,4 +43,20 @@ x+pi*sqrt(3)
 (x+(pi*sqrt(3)))
 ```
 
-A vous de proposer plus intéressant !
+## Réalisation
+
+Parties réalisées:
+
+    - Eval : Pour cette fonction nous avons matché l'expression, et selon l'expression on avons calculé l'expression pour finalement l'afficher à l'utilisateur.
+
+    - Subst : Si une variable était présente dans une expression, on a vérifié qu'elle soit la variable passée en argument et en fonction du résultat, on a remplacé ou pas cette variable par l'expression.
+
+    - Derive : Dérive toutes les expressions contenant la variable passée en arguments, toutes les autres expressions sont considérées comme des constantes.
+
+    - Simpl : Dans une boucle, on compare l'expression donnée avant et après l'application de Simpl, si elles sont égales on renvoie la nouvelle expression sinon on lui applique à nouveau
+              Simpl.
+              On a recherché sur internet les propriétés de simplification de certaines expressions puis on les a implémentées.
+              On a fait le choix de ne pas implémenter les règles trop spécifiques car elles étaient trop nombreuses. Comme la simplification de racine carrée donnée dans l'énoncé.
+
+
+
